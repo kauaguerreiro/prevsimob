@@ -1,0 +1,48 @@
+# Regras de contexto para agentes de IA — Projeto PrevsImob
+
+Este arquivo define diretrizes para qualquer agente de IA (Claude Code, Cursor,
+Codex CLI, Antigravity, etc.) que auxilie no desenvolvimento deste projeto,
+seguindo o fluxo Spec-Driven Development (SDD) adotado pela equipe.
+
+## Contexto do projeto
+- PrevsImob é um site imobiliário estático (HTML/CSS/JS puro, sem framework/build).
+- A funcionalidade central é o simulador "Prever Imóvel" (`prever.html` + `prever.js`),
+  que estima preços de imóveis a partir de regras de negócio tabeladas
+  (ver `docs/SDD.md` para a especificação completa).
+- Não há backend: todo o cálculo roda no navegador (client-side).
+
+## Fluxo obrigatório (SDD)
+1. Toda mudança de comportamento começa por uma atualização da especificação em
+   `docs/SDD.md` (requisitos funcionais/não funcionais, regras de negócio,
+   contratos de entrada/saída) **antes** de alterar código.
+2. Alterações relevantes de arquitetura devem gerar um novo ADR em `docs/ADR/`
+   (copiar o template e numerar sequencialmente).
+3. Nenhuma função de cálculo deve ser alterada sem que os testes em
+   `tests/prever.test.js` sejam atualizados/estendidos e executados
+   (`npm test`).
+4. Nenhum commit direto na branch `main`. Todo trabalho é feito em
+   `feature/<nome-da-tarefa>` a partir de `develop`, com Pull Request revisado
+   por outro integrante antes do merge.
+
+## Convenções de código
+- JavaScript puro (ES6+), sem dependências externas em tempo de execução no
+  navegador. Dependências de build/teste (Jest, http-server) ficam apenas em
+  `devDependencies`.
+- Funções de cálculo/negócio devem permanecer puras (sem acesso a `document`)
+  para serem testáveis fora do navegador — ver o padrão de exportação usado em
+  `prever.js` (`module.exports` condicional ao final do arquivo).
+- Textos e mensagens de interface em português (pt-BR); valores monetários
+  formatados com `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`.
+
+## O que o agente NÃO deve fazer sem confirmação humana
+- Alterar as tabelas de preços/fatores de ajuste (`tabelaPrecos`,
+  `fatoresAjuste`, `bonusAmenidades`) sem registrar a justificativa em um ADR.
+- Fazer push/commit direto em `main`.
+- Remover ou reduzir a cobertura de testes existente.
+
+## Comandos úteis que o agente pode executar
+- `npm install` — instalar dependências do harness de testes.
+- `npm test` — rodar a suíte de testes (Jest + jsdom).
+- `npm run test:coverage` — rodar testes com relatório de cobertura.
+- `npm start` — servir o site localmente (http-server, porta 8080).
+- `docker compose up --build` — subir o site em ambiente padronizado (Nginx).

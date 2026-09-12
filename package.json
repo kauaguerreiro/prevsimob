@@ -1,0 +1,17 @@
+{
+  "name": "prevsimob",
+  "version": "1.0.0",
+  "description": "PrevsImob — site imobiliário com simulador de previsão de preços (Prever Imóvel).",
+  "private": true,
+  "scripts": {
+    "test": "jest --colors",
+    "test:coverage": "jest --coverage",
+    "start": "npx http-server . -p 8080 -c-1",
+    "start:docker": "docker compose up --build"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "http-server": "^14.1.1"
+  }
+}

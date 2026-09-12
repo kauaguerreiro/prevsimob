@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: prevsimob-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # Serviço opcional para rodar o harness de testes dentro de um container Node,
+  # garantindo o mesmo ambiente para todos os membros da equipe.
+  test:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install --no-audit --no-fund && npm test"

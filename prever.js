@@ -297,3 +297,15 @@ const observer = new IntersectionObserver(function(entries) {
 document.querySelectorAll('.reveal').forEach(el => {
   observer.observe(el);
 });
+
+// Exporta funções puras para o test harness (Node/Jest).
+// Isso não afeta a execução no navegador, pois `module` não existe lá.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    calcularPrecoImovel,
+    formatarMoeda,
+    tabelaPrecos,
+    fatoresAjuste,
+    bonusAmenidades
+  };
+}
