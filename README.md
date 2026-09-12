@@ -126,3 +126,7 @@ Ferramenta que permite aos usuários:
 - Permitir usuários salvarem simulações e comparações.
 - Estender o harness com testes E2E (Playwright/Cypress) para os
   manipuladores de DOM do formulário (ver `docs/test-execution-report.md`).
+ 
+## Contato 
+ 
+Duvidas sobre o projeto: abra uma Issue neste repositorio. 
