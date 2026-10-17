@@ -19,6 +19,7 @@ e o preço por m², sem depender de um backend ou base de dados externa.
 | RF05  | Ao submeter o formulário, o sistema deve calcular e exibir: valor estimado, preço por m², faixa mínima e máxima (±15%) e um indicador visual de posicionamento dentro da faixa. |
 | RF06  | Se a cidade ou o tipo de imóvel informados não existirem na tabela de preços, o sistema deve informar o erro ao usuário e não exibir um resultado. |
 | RF07  | O usuário deve poder reiniciar a simulação ("Nova simulação") ou ser encaminhado à página de contato ("Consultar especialista"). |
+| RF08  | O motor de cálculo deve validar todos os campos de entrada (cidade, tipo, finalidade, área, quartos, banheiros, garagem, idade, conservação e amenidades). Qualquer valor fora do contrato da seção 5 deve resultar em `null` e em uma mensagem de erro específica ao usuário, nunca em `NaN`, preço negativo ou exceção. |
 
 ## 3. Requisitos Não Funcionais (RNF)
 
@@ -52,6 +53,13 @@ e o preço por m², sem depender de um backend ou base de dados externa.
 7. Se `cidade` ou `tipoImovel` não existirem na tabela de preços, a função de
    cálculo retorna `null` e o usuário é alertado — nenhum resultado numérico
    deve ser exibido nesse caso.
+8. Validação de entrada (RF08): a função retorna `null` e alerta o usuário com
+   mensagem específica quando: `finalidade` não for `"venda"` ou `"aluguel"`;
+   `area` não for um número finito maior ou igual a 0; `idade`, `conservacao`,
+   `quartos`, `banheiros` ou `garagem` não existirem em `fatoresAjuste`;
+   ou `amenidades` não for uma lista. Se `amenidades` for omitida, é tratada
+   como lista vazia. Chaves herdadas do protótipo de objetos (ex.:
+   `"constructor"`) não são valores válidos.
 
 ## 5. Contratos de Entrada/Saída
 
@@ -61,14 +69,14 @@ e o preço por m², sem depender de um backend ou base de dados externa.
 dados = {
   cidade: string,        // chave existente em tabelaPrecos (ex.: "sao-paulo")
   tipoImovel: string,    // chave existente na cidade (ex.: "apartamento")
-  finalidade: "venda" | "aluguel",
-  area: number,          // m², > 0 em uso normal (0 é aceito e retorna 0)
+  finalidade: "venda" | "aluguel",   // o formulário (prever.html) envia exatamente estes valores
+  area: number,          // m², número finito >= 0 (0 é aceito e retorna 0; negativo é inválido)
   quartos: number|string,    // 1..5 (ou "5" para 5+)
   banheiros: number|string,  // 1..4
   garagem: number|string,    // 0..4
   idade: "novo" | "recente" | "intermediario" | "velho",
   conservacao: "excelente" | "bom" | "regular" | "ruim",
-  amenidades: string[]   // subconjunto de: piscina, academia, churrasqueira,
+  amenidades: string[]   // opcional (padrão: []); subconjunto de: piscina, academia, churrasqueira,
                           // area_lazer, smart_home, seguranca_24h
 }
 ```
@@ -87,15 +95,17 @@ dados = {
 
 ### Saída (erro)
 
-`null`, acompanhado de um alerta ao usuário via `alert(...)`, quando `cidade`
-ou `tipoImovel` não existem na tabela de preços.
+`null`, acompanhado de um alerta ao usuário via `alert(...)` com mensagem
+específica do campo inválido (ex.: "Idade do imóvel inválida."), quando algum
+campo viola o contrato acima (regras de negócio 7 e 8).
 
 ## 6. Decomposição em Unidades (componentes testáveis)
 
 | Componente | Responsabilidade | Testabilidade |
 |------------|-------------------|---------------|
 | `tabelaPrecos` / `fatoresAjuste` / `bonusAmenidades` | Dados de negócio (preço-base, multiplicadores, bônus) | Dados puros, usados diretamente nos testes |
-| `calcularPrecoImovel(dados)` | Motor de cálculo (regras de negócio 1–7) | Função pura, sem acesso a DOM → 100% testável via Jest/Node |
+| `validarDadosImovel(dados)` | Validação do contrato de entrada (regra de negócio 8); retorna mensagem de erro ou `null` | Função pura, 100% testável via Jest/Node |
+| `calcularPrecoImovel(dados)` | Motor de cálculo (regras de negócio 1–8) | Função pura, sem acesso a DOM → 100% testável via Jest/Node |
 | `formatarMoeda(valor)` | Formatação de moeda pt-BR | Função pura, testável isoladamente |
 | Manipuladores de evento (`DOMContentLoaded`, submit do formulário, `exibirResultado`) | Integração com a interface (HTML) | Fora do escopo do harness unitário atual; validado manualmente / candidato a testes E2E futuros (ver "Refinamento por Feedback") |
 
@@ -106,3 +116,4 @@ ou `tipoImovel` não existem na tabela de preços.
 | Entrega inicial | Definição das regras de negócio 1–7 a partir do código existente em `prever.js` | O simulador já existia em produção sem uma especificação formal; este SDD documenta o comportamento real observado e testado, servindo de base para futuras mudanças. |
 | Entrega inicial | Separação explícita entre lógica pura (`calcularPrecoImovel`, `formatarMoeda`) e manipulação de DOM | Necessário para viabilizar testes automatizados (RNF03) sem exigir um navegador real. |
 | Próxima iteração sugerida | Cobrir manipuladores de evento com testes E2E (ex.: Playwright) | A cobertura atual do harness é de funções puras; o fluxo de submissão do formulário no DOM ainda depende de validação manual (ver `docs/test-execution-report.md`). |
+| 17/10/2026 | Inclusão do RF08 e da regra de negócio 8 (validação de entradas); `finalidade` passa a aceitar somente `venda` ou `aluguel`; `area` deve ser >= 0; `amenidades` é opcional | Auditoria final com sondagens manuais mostrou que entradas inválidas produziam `NaN` (idade, conservação, quartos), preço negativo (área negativa) e exceção (amenidades ausente), e que o formulário enviava `compra`, valor fora do contrato. Os 12 testes originais cobriam apenas o caminho feliz e casos de borda de cidade/tipo/área 0. Ver ADR 0004. |
