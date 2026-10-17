@@ -98,16 +98,45 @@ function formatarMoeda(valor) {
   }).format(valor);
 }
 
+// Finalidades aceitas pelo simulador (SDD, seção 5)
+const FINALIDADES_VALIDAS = ['venda', 'aluguel'];
+
+function temChave(objeto, chave) {
+  return Object.prototype.hasOwnProperty.call(objeto, chave);
+}
+
+// Valida o contrato de entrada (SDD, RF08 e regra de negócio 8).
+// Retorna uma mensagem de erro específica ou null quando os dados são válidos.
+function validarDadosImovel(dados) {
+  if (!dados || typeof dados !== 'object') return 'Dados do imóvel não informados.';
+
+  const { cidade, tipoImovel, finalidade, area, quartos, banheiros, garagem, idade, conservacao, amenidades } = dados;
+
+  if (!temChave(tabelaPrecos, cidade)) return 'Cidade inválida.';
+  if (!temChave(tabelaPrecos[cidade], tipoImovel)) return 'Tipo de imóvel inválido para a localização selecionada.';
+  if (!FINALIDADES_VALIDAS.includes(finalidade)) return 'Finalidade inválida (use venda ou aluguel).';
+  if (typeof area !== 'number' || !Number.isFinite(area) || area < 0) return 'Área inválida: informe um número maior ou igual a zero.';
+  if (!temChave(fatoresAjuste.idade, idade)) return 'Idade do imóvel inválida.';
+  if (!temChave(fatoresAjuste.conservacao, conservacao)) return 'Estado de conservação inválido.';
+  if (!temChave(fatoresAjuste.quartos, quartos)) return 'Número de quartos inválido (use de 1 a 5).';
+  if (!temChave(fatoresAjuste.banheiros, banheiros)) return 'Número de banheiros inválido (use de 1 a 4).';
+  if (!temChave(fatoresAjuste.garagem, garagem)) return 'Número de vagas de garagem inválido (use de 0 a 4).';
+  if (amenidades !== undefined && !Array.isArray(amenidades)) return 'Lista de amenidades inválida.';
+
+  return null;
+}
+
 // Função principal de cálculo
 function calcularPrecoImovel(dados) {
-  const { cidade, tipoImovel, area, quartos, banheiros, garagem, idade, conservacao, amenidades, finalidade } = dados;
-
-  // Obter preço base
-  const tabelaCidade = tabelaPrecos[cidade];
-  if (!tabelaCidade || !tabelaCidade[tipoImovel]) {
-    alert('Erro ao processar dados. Tente novamente.');
+  const erro = validarDadosImovel(dados);
+  if (erro) {
+    alert(erro);
     return null;
   }
+
+  const { cidade, tipoImovel, area, quartos, banheiros, garagem, idade, conservacao, finalidade } = dados;
+  const amenidades = dados.amenidades || [];
+  const tabelaCidade = tabelaPrecos[cidade];
 
   const precoBase = tabelaCidade[tipoImovel].base;
   const multiplicadorBase = tabelaCidade[tipoImovel].multiplicador;
@@ -304,6 +333,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     calcularPrecoImovel,
     formatarMoeda,
+    validarDadosImovel,
     tabelaPrecos,
     fatoresAjuste,
     bonusAmenidades
