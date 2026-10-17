@@ -41,10 +41,12 @@ npm start   # sobe http-server em http://localhost:8080
 
 ## Testes automatizados (Test Harness)
 
-O motor de cálculo do simulador (`calcularPrecoImovel` e `formatarMoeda`, em
-`prever.js`) possui uma suíte de testes automatizados com Jest, cobrindo
-cenários principais e casos de borda (cidade/tipo inválidos, área zero,
-amenidade desconhecida, divisor de aluguel, faixa ±15%, etc.).
+O motor de cálculo do simulador (`calcularPrecoImovel`, `validarDadosImovel` e `formatarMoeda`, em
+`prever.js`) possui suítes de testes automatizados com Jest, cobrindo
+cenários principais, casos de borda (cidade/tipo inválidos, área zero,
+amenidade desconhecida, divisor de aluguel, faixa ±15%, etc.) e validação de
+entradas inválidas (idade, conservação, quartos, área negativa, finalidade,
+amenidades; ver ADR 0004).
 
 ```bash
 npm install
@@ -55,7 +57,7 @@ npm run test:coverage  # roda com relatório de cobertura
 docker compose run test
 ```
 
-O log de execução mais recente (12/12 testes passando) e a análise de
+O log de execução mais recente (25/25 testes passando, em 2 suítes) e a análise de
 cobertura estão documentados em
 [`docs/test-execution-report.md`](docs/test-execution-report.md).
 
@@ -110,7 +112,7 @@ Ferramenta que permite aos usuários:
 - `app.js` — dados de exemplo e interações (busca, filtros, favoritos)
 - `prever.html` / `prever.js` — página e lógica do simulador de preços
 - `docs/SDD.md` — especificação técnica do problema
-- `docs/ADR/` — registro de decisões de arquitetura
+- `docs/ADR/` — registro de decisões de arquitetura (0001 a 0004)
 - `docs/test-execution-report.md` — log de execução dos testes
 - `tests/` — suíte de testes automatizados (Jest)
 - `Dockerfile`, `docker-compose.yml` — ambiente padronizado e reprodutível
@@ -126,7 +128,3 @@ Ferramenta que permite aos usuários:
 - Permitir usuários salvarem simulações e comparações.
 - Estender o harness com testes E2E (Playwright/Cypress) para os
   manipuladores de DOM do formulário (ver `docs/test-execution-report.md`).
- 
-## Contato 
- 
-Duvidas sobre o projeto: abra uma Issue neste repositorio. 
