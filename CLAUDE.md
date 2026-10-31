@@ -8,8 +8,8 @@
 ## Resumo rápido
 - Projeto: site imobiliário estático + simulador de preços "Prever Imóvel".
 - Especificação técnica: `docs/SDD.md`.
-- Decisões de arquitetura: `docs/ADR/`.
-- Testes: `tests/prever.test.js` (`npm test`).
+- Decisões de arquitetura: `docs/ADR/` (0001 a 0005).
+- Testes: `tests/` — 4 suítes Jest/jsdom (`npm test`, `npm run test:coverage`).
 - Ambiente padronizado: `Dockerfile` + `docker-compose.yml`.
 - Regras de fluxo de trabalho (branches, PRs): `CONTRIBUTING.md` e `.cursorrules`.
 

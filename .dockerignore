@@ -1,5 +1,22 @@
+# Somente os arquivos do site vão para a imagem Nginx.
 node_modules
 coverage
 .git
+.github
+.env
+.env.*
 *.log
-test-run-*.txt
+docs
+tests
+jest.config.js
+package.json
+package-lock.json
+Dockerfile
+docker-compose.yml
+.dockerignore
+.gitignore
+.cursorrules
+CLAUDE.md
+CONTRIBUTING.md
+CHANGELOG.md
+README.md

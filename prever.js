@@ -329,6 +329,7 @@ document.querySelectorAll('.reveal').forEach(el => {
 
 // Exporta funções puras para o test harness (Node/Jest).
 // Isso não afeta a execução no navegador, pois `module` não existe lá.
+/* istanbul ignore else -- o ramo falso só ocorre no navegador */
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     calcularPrecoImovel,

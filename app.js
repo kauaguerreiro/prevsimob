@@ -286,6 +286,7 @@ function formatCurrency(value){
 
 function renderProperties(list){
   const container = $('#properties');
+  if(!container) return; // páginas sem listagem dinâmica (só index.html possui #properties)
   container.innerHTML = '';
   if(!list.length){
     container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666; padding: 2rem;">Nenhum imóvel encontrado.</p>';
@@ -340,7 +341,7 @@ function applyFilters(){
 }
 
 function attachCardEvents(){
-  $$('.card .btn').forEach(btn => {
+  $$('.card .card-button[data-id]').forEach(btn => {
     btn.addEventListener('click', (e)=>{
       e.preventDefault();
       const id = Number(btn.dataset.id);
@@ -439,14 +440,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Formulário de busca
-  const formBusca = document.getElementById('searchForm');
-  if (formBusca) {
-    formBusca.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const termo = document.getElementById('q').value;
-      alert(`Buscando por: ${termo}`);
-      window.location.href = 'propriedades.html';
-    });
-  }
 });
+
+// Exporta funções para o test harness (Node/Jest); sem efeito no navegador.
+/* istanbul ignore else -- o ramo falso só ocorre no navegador */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    imoveis, properties, verDetalhes, carregarDetalhes, formatCurrency,
+    renderProperties, getFilters, applyFilters, openModal, debounce, init
+  };
+}

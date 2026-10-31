@@ -17,9 +17,9 @@ seguindo o fluxo Spec-Driven Development (SDD) adotado pela equipe.
    contratos de entrada/saída) **antes** de alterar código.
 2. Alterações relevantes de arquitetura devem gerar um novo ADR em `docs/ADR/`
    (copiar o template e numerar sequencialmente).
-3. Nenhuma função de cálculo deve ser alterada sem que os testes em
-   `tests/prever.test.js` sejam atualizados/estendidos e executados
-   (`npm test`).
+3. Nenhuma função deve ser alterada sem que os testes em `tests/` sejam
+   atualizados/estendidos e executados (`npm run test:coverage`); o CI
+   bloqueia queda de cobertura abaixo dos limites do `jest.config.js`.
 4. Nenhum commit direto na branch `main`. Todo trabalho é feito em
    `feature/<nome-da-tarefa>` a partir de `develop`, com Pull Request revisado
    por outro integrante antes do merge.
