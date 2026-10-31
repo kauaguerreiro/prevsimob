@@ -1,130 +1,138 @@
 # PrevsImob — Site imobiliário com simulador de previsão de preços
 
-## Visão Geral
+[![CI — Test Harness](https://github.com/kauaguerreiro/prevsimob/actions/workflows/ci.yml/badge.svg)](https://github.com/kauaguerreiro/prevsimob/actions/workflows/ci.yml)
+![Versão](https://img.shields.io/badge/versão-1.0.0-0052cc)
+![Testes](https://img.shields.io/badge/testes-64%2F64-success)
+![Cobertura](https://img.shields.io/badge/cobertura%20de%20linhas-100%25-success)
 
-PrevsImob é um site imobiliário (front-end estático, sem backend) com listagem
-de imóveis (busca, filtros, favoritos) e um simulador inteligente de preços —
-a aba **"Prever Imóvel"** — que estima o valor de venda/aluguel de um imóvel
-a partir de características informadas pelo usuário (cidade, tipo, área,
-quartos, banheiros, garagem, idade, conservação e amenidades).
+PrevsImob é um site imobiliário estático (HTML, CSS e JavaScript puro, sem
+backend) com listagem de imóveis — busca, filtros, ordenação e página de
+detalhes — e um **simulador de preços** (aba **"Prever Imóvel"**) que estima o
+valor de venda ou aluguel de um imóvel a partir de cidade, tipo, área,
+quartos, banheiros, garagem, idade, conservação e amenidades.
 
-A especificação completa do problema (requisitos funcionais/não funcionais,
-regras de negócio e contratos de entrada/saída) está em
-[`docs/SDD.md`](docs/SDD.md). As decisões de arquitetura estão registradas
-como ADRs em [`docs/ADR/`](docs/ADR).
+- Especificação As-Built (arquitetura, regras, contratos): [`docs/SDD.md`](docs/SDD.md)
+- Decisões de arquitetura: [`docs/ADR/`](docs/ADR) (0001 a 0005)
+- Relatório de testes e cobertura: [`docs/test-execution-report.md`](docs/test-execution-report.md)
+- Histórico de versões: [`CHANGELOG.md`](CHANGELOG.md)
 
-## Como instalar e executar
+## Início rápido (comando único)
 
-### Opção 1 — Direto no navegador (mais simples)
-
-1. Abra `index.html` no navegador (duplo clique ou arraste no browser).
-2. Use a busca, filtros e ordenação para explorar os imóveis de exemplo.
-3. Clique em "Ver imóvel" para detalhes e no ★ para favoritar (salvo em `localStorage`).
-4. Acesse a aba **"Prever Imóvel"** para usar o simulador de preços.
-
-### Opção 2 — Ambiente padronizado com Docker (recomendado)
-
-Pré-requisito: Docker + Docker Compose instalados.
+Pré-requisito: Docker com Docker Compose v2.
 
 ```bash
-docker compose up --build
+git clone https://github.com/kauaguerreiro/prevsimob.git
+cd prevsimob
+docker compose up --build          # site em http://localhost:8080
 ```
 
-O site ficará disponível em `http://localhost:8080`.
-
-### Opção 3 — Servidor local via Node (sem Docker)
+Testes, também com comando único:
 
 ```bash
-npm install
-npm start   # sobe http-server em http://localhost:8080
+docker compose run --rm test       # 64 testes
+docker compose run --rm coverage   # testes + relatório de cobertura em ./coverage/
 ```
 
-## Testes automatizados (Test Harness)
+## Variáveis de ambiente
 
-O motor de cálculo do simulador (`calcularPrecoImovel`, `validarDadosImovel` e `formatarMoeda`, em
-`prever.js`) possui suítes de testes automatizados com Jest, cobrindo
-cenários principais, casos de borda (cidade/tipo inválidos, área zero,
-amenidade desconhecida, divisor de aluguel, faixa ±15%, etc.) e validação de
-entradas inválidas (idade, conservação, quartos, área negativa, finalidade,
-amenidades; ver ADR 0004).
+O projeto não usa chaves de API, banco de dados nem segredos. A única
+variável é opcional:
+
+| Variável | Padrão | Uso |
+|----------|--------|-----|
+| `PORT` | `8080` | Porta do host onde o `docker compose` publica o site |
 
 ```bash
-npm install
-npm test               # roda a suíte de testes
-npm run test:coverage  # roda com relatório de cobertura
-
-# ou, 100% containerizado:
-docker compose run test
+cp .env.example .env   # opcional; edite PORT se a 8080 estiver ocupada
 ```
 
-O log de execução mais recente (25/25 testes passando, em 2 suítes) e a análise de
-cobertura estão documentados em
-[`docs/test-execution-report.md`](docs/test-execution-report.md).
+## Outras formas de executar
 
-## Agentes de IA e fluxo SDD
+**Sem instalar nada:** abra `index.html` direto no navegador.
 
-Este projeto adota Spec-Driven Development (SDD): mudanças de comportamento
-passam primeiro pela especificação (`docs/SDD.md`), depois por ADRs quando
-afetam arquitetura/regras de negócio, e só então por código + testes.
+**Com Node.js 18+ (sem Docker):**
 
-Um agente de IA foi utilizado como apoio ao desenvolvimento (diagnóstico do
-repositório, redação do SDD, criação do harness de testes, Dockerfile e
-templates de governança). As regras de contexto que o agente segue estão em
-[`.cursorrules`](.cursorrules) e [`CLAUDE.md`](CLAUDE.md); o registro de como
-e onde ele foi usado está em
-[`docs/ADR/0003-uso-de-agentes-de-ia.md`](docs/ADR/0003-uso-de-agentes-de-ia.md).
+```bash
+npm ci                   # instala as dependências exatas do package-lock.json
+npm start                # http://localhost:8080
+npm test                 # roda a suíte
+npm run test:coverage    # roda com cobertura (falha se ficar abaixo dos limites)
+```
 
-## Governança do repositório
+O relatório HTML de cobertura fica em `coverage/lcov-report/index.html`.
 
-- Fluxo de branches (`main` / `develop` / `feature/*`), regras de Pull
-  Request e uso de Issues/Projects: ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- Templates de Issue e PR: [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE)
-  e [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md).
+## Como usar
 
-## Simulador de Previsão de Imóveis
+**Listagem (`index.html`):** digite na busca (filtra enquanto você digita),
+escolha tipo, finalidade e ordenação por preço. "Ver detalhes" mostra o
+resumo do imóvel.
 
-Ferramenta que permite aos usuários:
-- **Simular preços** de imóveis baseado em múltiplos critérios
-- **Comparar valores** em diferentes cidades e localidades
-- **Considerar amenidades** e condições do imóvel
-- **Visualizar faixas de preço** com indicador de valor estimado
+**Propriedades (`propriedades.html`):** "Ver Detalhes" abre a página completa
+do imóvel (`detalhes.html`).
 
-**Como usar:**
-1. Clique em "Prever Imóvel" na navegação
-2. Preencha o formulário com cidade/localização, tipo de imóvel, finalidade
-   (compra/venda ou aluguel), área em m², quartos, banheiros, vagas de
-   garagem, idade e estado de conservação, e amenidades
-3. Clique em "Calcular Preço"
-4. Receba a estimativa: valor estimado, preço por m², faixa mínima/máxima e
-   comparativo com os detalhes inseridos
+**Prever Imóvel (`prever.html`):**
+1. Preencha cidade, tipo, finalidade (compra/venda ou aluguel), área, quartos,
+   banheiros, vagas, idade e conservação; marque as amenidades.
+2. Clique em "Calcular Preço".
+3. Veja o valor estimado, o preço por m², a faixa de ±15% e o indicador.
+4. Use "Nova simulação" para recomeçar ou "Consultar especialista" para ir ao contato.
 
-**Tecnologia:**
-- Algoritmo baseado em tabelas de preço por cidade/tipo (ver `docs/SDD.md`)
-- Múltiplos fatores de ajuste (idade, conservação, amenidades)
-- Variação de exibição de ±15%
-- Cálculo diferenciado para vendas e aluguel
+Exemplo: São Paulo, apartamento, venda, 80 m², 3 quartos, 2 banheiros, 1 vaga,
+intermediário, regular → **R$ 768.000,00** (R$ 9.600,00/m²).
 
-## Estrutura de arquivos (principais)
+> Os valores são paramétricos e ilustrativos (ver ADR 0002), não uma avaliação real de mercado.
 
-- `index.html`, `propriedades.html`, `sobre.html`, `contato.html`,
-  `login.html`, `cadastro.html`, `detalhes.html`, `servicos.html` — páginas do site
-- `style.css` — estilos e tema (azul + teal)
-- `app.js` — dados de exemplo e interações (busca, filtros, favoritos)
-- `prever.html` / `prever.js` — página e lógica do simulador de preços
-- `docs/SDD.md` — especificação técnica do problema
-- `docs/ADR/` — registro de decisões de arquitetura (0001 a 0004)
-- `docs/test-execution-report.md` — log de execução dos testes
-- `tests/` — suíte de testes automatizados (Jest)
-- `Dockerfile`, `docker-compose.yml` — ambiente padronizado e reprodutível
-- `.cursorrules`, `CLAUDE.md` — contexto/regras para agentes de IA
+## Testes automatizados
 
-## Próximos passos sugeridos
+| Suíte | Tipo | Testes |
+|-------|------|--------|
+| `tests/prever.test.js` | Unitário — motor de cálculo | 12 |
+| `tests/prever.validacao.test.js` | Unitário — validação de entradas | 13 |
+| `tests/prever.dom.test.js` | Integração — página do simulador | 13 |
+| `tests/app.test.js` | Integração — listagem, detalhes, formulários | 26 |
 
-- Integrar com backend / API real para carregar imóveis dinamicamente.
-- Substituir `alert` por modal customizado com galeria de imagens.
-- Adicionar paginação e formulário de contato funcional.
-- Conectar simulador com base de dados de transações reais para melhor precisão.
-- Adicionar gráficos e análises de tendência de mercado.
-- Permitir usuários salvarem simulações e comparações.
-- Estender o harness com testes E2E (Playwright/Cypress) para os
-  manipuladores de DOM do formulário (ver `docs/test-execution-report.md`).
+Os testes de integração carregam o HTML real de cada página no jsdom e
+disparam eventos reais. O CI (GitHub Actions) roda tudo a cada push/PR e
+bloqueia regressões de cobertura (`prever.js` exige 100%).
+
+## Estrutura
+
+```
+├── index.html, propriedades.html, detalhes.html, servicos.html,
+│   sobre.html, contato.html, login.html, cadastro.html  — páginas do site
+├── prever.html / prever.js   — simulador de preços (motor + interface)
+├── app.js                    — listagem, filtros, detalhes, formulários, UI comum
+├── style.css                 — tema e responsividade
+├── tests/                    — test harness (Jest + jsdom)
+├── docs/SDD.md               — especificação As-Built
+├── docs/ADR/                 — decisões de arquitetura
+├── Dockerfile, docker-compose.yml, .env.example — ambiente padronizado
+├── .github/                  — CI, templates de Issue e PR
+└── .cursorrules, CLAUDE.md   — regras de contexto para agentes de IA
+```
+
+## Fluxo SDD e agentes de IA
+
+Toda mudança de comportamento passa primeiro pela especificação
+(`docs/SDD.md`), depois por ADR quando afeta arquitetura ou regras de negócio,
+e só então por código + testes. Um agente de IA apoiou diagnóstico,
+especificação, testes e empacotamento; as regras que ele segue estão em
+[`.cursorrules`](.cursorrules) e [`CLAUDE.md`](CLAUDE.md), e o registro de uso
+em [`docs/ADR/0003-uso-de-agentes-de-ia.md`](docs/ADR/0003-uso-de-agentes-de-ia.md).
+
+## Governança
+
+Branches `main` (protegida) / `develop` / `feature/*`, PR com revisão
+obrigatória e CI verde. Detalhes em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Limitações conhecidas e próximos passos
+
+- Preços paramétricos; integrar a uma base de transações reais.
+- Contato, login e cadastro são demonstrativos (sem envio nem autenticação).
+- Favoritos ficaram fora da v1.0.0 (backlog).
+- Testes E2E em navegador real (Playwright) para layout e responsividade.
+- Backend/API para carregar imóveis dinamicamente.
+
+## Contato
+
+Dúvidas sobre o projeto: abra uma [Issue](https://github.com/kauaguerreiro/prevsimob/issues).
