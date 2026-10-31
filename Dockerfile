@@ -1,7 +1,11 @@
-# PrevsImob — imagem para servir o site estático (index.html, prever.html, etc.)
+# PrevsImob v1.0.0 — imagem para servir o site estático (index.html, prever.html, etc.)
 FROM nginx:1.27-alpine
 
-# Remove config padrão e copia o site para a raiz do nginx
+LABEL org.opencontainers.image.title="PrevsImob" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.source="https://github.com/kauaguerreiro/prevsimob"
+
+# Remove o conteúdo padrão e copia apenas os arquivos do site (ver .dockerignore)
 RUN rm -rf /usr/share/nginx/html/*
 COPY . /usr/share/nginx/html
 
